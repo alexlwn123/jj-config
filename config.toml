@@ -166,7 +166,7 @@ if(root,
   format_root_commit(self),
   label(if(current_working_copy, "working_copy"),
     separate(" ",
-      pad_end(7, format_short_change_id_with_hidden_and_divergent_info(self)),
+      pad_end(7, format_short_change_id_with_change_offset(self)),
       format_short_signature(author) ++ ": " ++ truncate_end(80, description.first_line()),
       bookmarks,
       tags,
@@ -175,14 +175,14 @@ if(root,
     ) ++ "\n",
   )
 )'''
-    #   pad_end(12, format_short_change_id_with_hidden_and_divergent_info(self) ++ " " ++ format_short_commit_id(commit_id),
+    #   pad_end(12, format_short_change_id_with_change_offset(self) ++ " " ++ format_short_commit_id(commit_id),
 template-aliases.medium = '''
 if(root,
   format_root_commit(self),
   label(if(current_working_copy, "working_copy"),
     separate(" ",
       pad_end(14, separate(" ",
-        format_short_change_id_with_hidden_and_divergent_info(self),
+        format_short_change_id_with_change_offset(self),
         format_short_commit_id(commit_id)
       )),
       format_timestamp(commit_timestamp(self)),
@@ -214,3 +214,4 @@ ui.pager = [
     "-FRX",
 ]
 ui.graph.style = "square"
+remotes.origin.auto-track-bookmarks = "glob:alex/* | main | master"
