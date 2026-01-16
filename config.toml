@@ -152,6 +152,7 @@ revset-aliases.children = "reachable(@, mutable())"
 #     "ancestors(reachable(@, mutable()), 2)",
 
 revsets.log = "@ | bases | branches | curbranch::@ | @::nextbranch | downstream(@, branchesandheads) | ancestors(dev, 2)"
+# revsets.log = "@ | bases | branches | curbranch::@ | @::nextbranch | downstream(@, branchesandheads)"
 
 
 signing.backend = "gpg"
