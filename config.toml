@@ -1,0 +1,216 @@
+# default-command = "log"
+ui.editor = "vim"
+
+ui.bookmark-list-sort-keys = ['committer-date-']
+
+user.email = "alexlwn123@gmail.com"
+user.name = "Alex Lewin"
+
+aliases.P = [
+    "git",
+    "push",
+]
+
+git.private-commits = "private-dev"
+revset-aliases.dev = "private-dev"
+
+# Rebase dev out of the way
+aliases.rd = [
+    "rebase",
+    "-s",
+    "dev+",
+    "-d",
+    "trunk()"
+]
+# Rebase dev back on top of trunk
+aliases.urd = [
+    "rebase",
+    "-s",
+    "h+ & ~ dev & mine()",
+    "-d",
+    "dev"
+]
+aliases.Pa = [
+    "git",
+    "push",
+    "-r",
+    "bookmarks() & ~conflict()",
+]
+aliases.ad = [
+    "bookmark",
+    "move",
+    "--from",
+    "heads(bookmarks() & ::@)",
+    "--to",
+    "coalesce(@ & ~empty(), @-)",
+]
+aliases.c = ["new"]
+aliases.f = [
+    "git",
+    "fetch",
+]
+aliases.far = [
+    "bash",
+    "-lc",
+    "jj f && jj rebase -d h",
+]
+# aliases.l = [
+#     "log",
+#     "-r",
+#     "ancestors(reachable(@, mutable()), 2)",
+#     # "--reversed"
+# ]
+aliases.l = [
+    "log",
+    "-r",
+    "ancestors(reachable(@, mutable()), 2)",
+    # "--reversed"
+]
+aliases.ll = [
+    "log",
+    "-r",
+    "ancestors(reachable(@ | bookmarks(), mutable()), 2)",
+]
+aliases.lll = ["ll", "--template", "medium"]
+aliases.llll = ["log", "--template", "builtin_log_detailed"]
+aliases.lost = [
+    "log",
+    "-r",
+    "mine() & mutable()",
+]
+aliases.m = [
+    "resolve",
+    "--tool",
+    "mergiraf",
+]
+aliases.n = [
+    "next",
+    "--edit",
+]
+aliases.p = [
+    "prev",
+    "--edit",
+]
+aliases."+" = [
+    "next",
+    "--edit",
+]
+aliases."-" = [
+    "prev",
+    "--edit",
+]
+aliases.ra = [
+    "rebase",
+    "-s",
+    "all:roots(trunk()..(latest(::trunk(), 100):: & bookmarks())) & mutable()",
+    "-d",
+    "trunk()",
+    "--skip-empty",
+]
+
+# clean up recently added files
+aliases.clean = [
+    "util", "exec", "--", "bash", "-c", """
+    set -euo pipefail
+    jj diff --summary | grep .d.ts | awk '$1=="A"{print $2}' | xargs rm
+    """, ""
+]
+aliases.clean-others = [
+    "abandon",
+    "-r",
+    "mutable() & ~::mine()"
+]
+colors.author = "magenta"
+colors.bookmarks = "blue"
+colors.change_id = "bright blue"
+colors.commit_id = "yellow"
+colors."working_copy author" = "magenta"
+colors."working_copy bookmarks" = "blue"
+colors."working_copy change_id" = {fg = "bright blue", underline = true}
+fix.tools.rustfmt.command = ["rustfmt"]
+fix.tools.rustfmt.patterns = ["glob:'**/*.rs'"]
+git.sign-on-push = true
+revset-aliases.g = "heads(bookmarks() & ::@)"
+revset-aliases.h = "trunk()"
+revset-aliases."immutable_heads()" = 'trunk() | untracked_remote_bookmarks(remote = "origin")'
+revset-aliases.j = "@"
+revset-aliases.jj = "@-"
+revset-aliases.jjj = "@--"
+revset-aliases.jjjj = "@---"
+revset-aliases.jjjjj = "@----"
+revset-aliases.jjjjjj = "@-----"
+revsets.short-prefixes = "latest(trunk().. & mine(), 20)"
+
+# https://reasonablypolymorphic.com/blog/jj-strategy/
+revset-aliases.bases = "dev | trunk()"
+revset-aliases."downstream(x,y)" = "(x::y) & y"
+revset-aliases.branches = "downstream(bases, bookmarks()) & mine()"
+revset-aliases.branchesandheads = "branches | (heads(bases::) & mine())"
+revset-aliases.curbranch = "latest(branches::@- & branches)"
+revset-aliases.nextbranch = "roots(@:: & branchesandheads)"
+revset-aliases.children = "reachable(@, mutable())"
+#     "ancestors(reachable(@, mutable()), 2)",
+
+revsets.log = "@ | bases | branches | curbranch::@ | @::nextbranch | downstream(@, branchesandheads) | ancestors(dev, 2)"
+
+
+signing.backend = "gpg"
+signing.behavior = "drop"
+signing.key = "1FF18F8244204C9A"
+
+# signing.behavior = "drop"
+# signing.key = "/SSH_AGENT_KEY"
+# signing.backends.ssh.program = "jj-ssh-keygen"
+template-aliases.builtin_log_compact = '''
+if(root,
+  format_root_commit(self),
+  label(if(current_working_copy, "working_copy"),
+    separate(" ",
+      pad_end(7, format_short_change_id_with_hidden_and_divergent_info(self)),
+      format_short_signature(author) ++ ": " ++ truncate_end(80, description.first_line()),
+      bookmarks,
+      tags,
+      working_copies,
+      if(empty, label("empty", "(empty)")),
+    ) ++ "\n",
+  )
+)'''
+    #   pad_end(12, format_short_change_id_with_hidden_and_divergent_info(self) ++ " " ++ format_short_commit_id(commit_id),
+template-aliases.medium = '''
+if(root,
+  format_root_commit(self),
+  label(if(current_working_copy, "working_copy"),
+    separate(" ",
+      pad_end(14, separate(" ",
+        format_short_change_id_with_hidden_and_divergent_info(self),
+        format_short_commit_id(commit_id)
+      )),
+      format_timestamp(commit_timestamp(self)),
+      format_short_signature(author) ++ ": " ++ truncate_end(80, description.first_line()),
+      bookmarks,
+      tags,
+      working_copies,
+      if(empty, label("empty", "(empty)")),
+    ) ++ "\n",
+  )
+)'''
+template-aliases."format_short_change_id(id)" = "id.shortest()"
+template-aliases."format_short_signature(signature)" = """
+if(signature.name(),
+    label("username", pad_end(5, signature.name().substr(0, 5).lower())),
+  email_placeholder)"""
+template-aliases."format_timestamp(timestamp)" = "timestamp.ago()"
+templates.git_push_bookmark = '"alex/jj-" ++ change_id.short(5)'
+ui.always-allow-large-revsets = true
+ui.default-command = "log"
+# ui.diff-formatter = [
+#     "difft",
+#     "--color=always",
+#     "$left",
+#     "$right",
+# ]
+ui.pager = [
+    "less",
+    "-FRX",
+]
+ui.graph.style = "square"
